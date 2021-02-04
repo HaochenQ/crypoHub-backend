@@ -1,5 +1,5 @@
 {
     "dbConfig": {
-        "host": "mongodb+srv://vidlyuser:qhc124EE@cluster0.dwuw9.mongodb.net/crypo_data?retryWrites=true&w=majority"
+        "host": "mongodb://localhost:27017/crypo_data"
     }
 }
