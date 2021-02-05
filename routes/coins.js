@@ -1,5 +1,4 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const router = express.Router();
 const diffSec = require("../utils/getSecInDay");
 const historicalDataModel = require("../module/historicalData");
@@ -9,8 +8,8 @@ const PriceDifference = require("../utils/difference");
 const currentDate = new Date("2019-12-04T00:00:00.000Z");
 //get the date of 1 day/1 week/1 month ago
 const lastDay = new Date(currentDate.getTime() - diffSec(1));
-const lastWeek = new Date(currentDate.getTime() - diffSec(7));
-const lastMonth = new Date(currentDate.getTime() - diffSec(30));
+const lastWeek = new Date(currentDate.getTime() - diffSec(6));
+const lastMonth = new Date(currentDate.getTime() - diffSec(29));
 
 router.get("/", async (req, res) => {
   const historicalData = await historicalDataModel.find().sort("-MarketCap");
@@ -65,22 +64,22 @@ router.get("/:id", async (req, res) => {
   const id = req.params.id;
   const days = req.query.days;
   const data = await fetchData(id, days);
+  if (!data) {
+    return res.status(404).send("Coin with given name not found");
+  }
   res.send(data);
 });
 
-//fetch data from givenDate to currentDate based on id
+//fetch data from days to currentDate based on id
 const fetchData = async (id, days) => {
-  let Data = [];
-  if (days === "7") {
-    Data = await historicalDataModel
-      .find({ Currency: id, Date: { $gte: lastWeek, $lt: currentDate } })
-      .sort("Date");
-  } else if (days === "30") {
-    Data = await historicalDataModel
-      .find({ Currency: id, Date: { $gte: lastMonth, $lt: currentDate } })
+  if (days === "30") {
+    return await historicalDataModel
+      .find({ Currency: id, Date: { $gte: lastMonth, $lte: currentDate } })
       .sort("Date");
   }
-  return Data;
+  return await historicalDataModel
+    .find({ Currency: id, Date: { $gte: lastWeek, $lte: currentDate } })
+    .sort("Date");
 };
 
 module.exports = router;
